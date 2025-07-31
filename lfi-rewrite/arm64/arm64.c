@@ -66,33 +66,13 @@ arm64_rewrite(FILE* input, struct output* output)
     const size_t npass = sizeof(passes) / sizeof(passes[0]);
 
     for (size_t i = 0; i < npass; i++) {
-        passes[i].disabled = false;
-        if (args.boxtype < BOX_FULL && passes[i].fn == &arm64_loadspass)
-            passes[i].disabled = true;
-        if (args.boxtype < BOX_STORES && passes[i].fn == &arm64_storespass)
-            passes[i].disabled = true;
-        if (args.boxtype < BOX_BUNDLEJUMPS && passes[i].fn == &arm64_branchpass)
-            passes[i].disabled = true;
-        if (args.boxtype == BOX_SYSCALLS && passes[i].fn == &arm64_specialpass) {
-            passes[i].disabled = true;
-            args.noguardelim = true;
-        }
-        if (args.poc && passes[i].fn == &arm64_pocpass)
-            passes[i].disabled = false;
-        else if (passes[i].fn == &arm64_pocpass)
-            passes[i].disabled = true;
-        if (args.meter != METER_NONE && passes[i].fn == &arm64_meterpass)
-            passes[i].disabled = false;
-        else if (passes[i].fn == &arm64_meterpass)
-            passes[i].disabled = true;
-        if (args.allowtls && passes[i].fn == &arm64_tlspass)
-            passes[i].disabled = true;
-        else if (passes[i].fn == &arm64_tlspass)
-            passes[i].disabled = false;
-        if (args.syscall && passes[i].fn == &arm64_syscallpass)
-            passes[i].disabled = true;
-        else if (passes[i].fn == &arm64_syscallpass)
-            passes[i].disabled = false;
+        passes[i].disabled = true;
+        if (passes[i].fn == &arm64_loadspass)
+          passes[i].disabled = false;
+        else if (passes[i].fn == &arm64_storespass)
+          passes[i].disabled = false;
+        else if (passes[i].fn == &arm64_branchpass)
+          passes[i].disabled = false;
     }
 
     for (size_t i = 0; i < npass; i++) {
@@ -113,9 +93,6 @@ arm64_rewrite(FILE* input, struct output* output)
             op = next;
         }
     }
-
-    if (!args.noguardelim)
-        arm64_guardelim(ops);
 
     arm64_display(output, ops);
 

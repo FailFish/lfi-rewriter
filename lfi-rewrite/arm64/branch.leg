@@ -10,7 +10,7 @@
 }                                              \
 %}
 
-Top = IndBranch | ShortBranch
+Top = ShortBranch
 
 IndBranch = b:BRANCH r:XREG {
     mkinsn("add x28, x27, w%s, uxtw", num(r.val));

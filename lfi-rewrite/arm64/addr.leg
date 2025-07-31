@@ -27,6 +27,111 @@ ldstmulti(Result l, Result rt1, Result rt2, Result addr)
 }
 %}
 
+AddrOptNoChange = (
+    # [xN, i]!
+      (LB r:XREG COMMA i:IMM RB EXCLAM) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s, %s]!", r.val, i.val),
+        };
+        rfree(r); rfree(i);
+    }
+    # [xN, xM]
+    | (LB r1:XREG COMMA r2:REG RB) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r1.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s, %s]", r1.val, r2.val),
+        };
+        rfree(r1); rfree(r2);
+    }
+    # [xN, i]
+    | (LB r:XREG COMMA i:IMM RB) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s, %s]", r.val, i.val),
+        };
+        rfree(r); rfree(i);
+    }
+    # [xN], i
+    | (LB r:XREG RB COMMA i:IMM) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s], %s", r.val, i.val),
+        };
+        rfree(r); rfree(i);
+    }
+    # [xN]
+    | (LB r:XREG RB) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s]", r.val),
+        };
+        rfree(r);
+    }
+    # [xN, xM, ...]
+    | (LB r1:XREG_SP COMMA r2:REG COMMA m:ADDR_MOD RB) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r1.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s, %s, %s]", r1.val, r2.val, m.val),
+        };
+        rfree(r1); rfree(r2); rfree(m);
+    }
+)
+
+AddrNoOptNoChange = (
+    # [xN, i]!
+      (LB r:XREG COMMA i:IMM RB EXCLAM) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s, %s]!", r.val, i.val),
+        };
+        rfree(r); rfree(i);
+    }
+    # [xN, i]
+    | (LB r:XREG COMMA i:IMM RB) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s, %s]", r.val, i.val),
+        };
+        rfree(r); rfree(i);
+    }
+    # [xN], xM
+    | (LB r1:XREG RB COMMA r2:XREG) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r1.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s], %s", r1.val, r2.val),
+        };
+        rfree(r1); rfree(r2);
+    }
+    # [xN], i
+    | (LB r:XREG RB COMMA i:IMM) {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s], %s", r.val, i.val),
+        };
+        rfree(r); rfree(i);
+    }
+    # [xN]
+    | (LB r:XREG RB) !COMMA {
+        $$ = (Result) {
+            .premulti[0] = xasprintf("add x18, x18, %s, lsr #4", r.val),
+            .premulti[1] = xasprintf("ldr xzr, [x18]"),
+            .val = xasprintf("[%s]", r.val),
+        };
+        rfree(r);
+    }
+)
+
 # Address mode transformations that use [x27, wN, uxtw].
 AddrOpt = (
     # [xN, i]!

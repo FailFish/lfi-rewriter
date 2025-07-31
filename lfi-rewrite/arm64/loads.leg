@@ -5,19 +5,43 @@
     ctx->idx += yyc != 0;                      \
     result = yyc == 0 ? 0 : (*(buf) = yyc, 1); \
 }                                              \
+
+static void
+emit_premulti(Result addr)
+{
+    for (size_t i = 0; i < sizeof(addr.premulti) / sizeof(*addr.premulti); i++) {
+        if (addr.premulti[i]) {
+          mkinsn("%s", addr.premulti[i]);
+        }
+    }
+    // don't free
+}
+
+static void
+sfitag_tagload()
+{
+    mkinsn("mov x18, #0x40000000000");
+}
+
 %}
 
 Top = LdOpt | LdNoOpt | LdMulti
 
-LdOpt = l:LD (!'zt' rt:REG) COMMA addr:AddrOpt {
+LdOpt = l:LD (!'zt' rt:REG) COMMA addr:AddrOptNoChange {
+    sfitag_tagload();
+    emit_premulti(addr);
     ldst(l, rt, addr);
 }
 
-LdNoOpt = l:LD_BASIC rt:REG COMMA addr:AddrNoOpt {
+LdNoOpt = l:LD_BASIC rt:REG COMMA addr:AddrNoOptNoChange {
+    sfitag_tagload();
+    emit_premulti(addr);
     ldst(l, rt, addr);
 }
 
-LdMulti = l:LD_MULTI rt1:REG COMMA rt2:REG COMMA addr:AddrNoOpt {
+LdMulti = l:LD_MULTI rt1:REG COMMA rt2:REG COMMA addr:AddrNoOptNoChange {
+    sfitag_tagload();
+    emit_premulti(addr);
     ldstmulti(l, rt1, rt2, addr);
 }
 
