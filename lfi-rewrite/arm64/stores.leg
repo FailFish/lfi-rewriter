@@ -21,7 +21,7 @@ emit_premulti(Result addr)
 static void
 sfitag_tagload()
 {
-    mkinsn("mov x18, #0x40000000000");
+    mkinsn("mov x18, 0x4000000000");
 }
 
 %}
