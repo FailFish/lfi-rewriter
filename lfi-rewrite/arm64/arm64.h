@@ -1,11 +1,13 @@
 #pragma once
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <assert.h>
 
 #include "args.h"
+#include "op.h"
 
 static const char*
 num(const char* reg)
@@ -100,3 +102,13 @@ bundle_bicmask()
         return NULL;
     }
 }
+
+static void
+sfitag_tagload()
+{
+  if(getenv("HOST_VA_48"))
+    mkinsn("mov x18, 0x%llx", 1ULL << 47);
+  else
+    mkinsn("mov x18, 0x%llx", 1ULL << 38); // android specific
+}
+

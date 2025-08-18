@@ -17,13 +17,6 @@ emit_premulti(Result addr)
     }
     // don't free
 }
-
-static void
-sfitag_tagload()
-{
-    mkinsn("mov x18, 0x4000000000");
-}
-
 %}
 
 Top = StOpt | StNoOpt | StMulti | Atomic1 | Atomic2
